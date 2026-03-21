@@ -8,6 +8,7 @@ Original base: https://github.com/calesthio/Crucix.git
 
 <img src="docs/dashGold.png" alt="CrucixExpanded dashboard in amber theme" width="100%" />
 
+</div>
 ---
 
 
