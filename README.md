@@ -2,7 +2,11 @@
 
 # crucixExpanded
 
-Modified version of https://github.com/calesthio/Crucix.git
+Customized working fork of the original Crucix project, with active development centered on cybersecurity intelligence and expanded dashboard workflows.
+
+Original base: https://github.com/calesthio/Crucix.git
+
+<img src="docs/dashGold.png" alt="CrucixExpanded dashboard in amber theme" width="100%" />
 
 ---
 
@@ -13,25 +17,54 @@ Modified version of https://github.com/calesthio/Crucix.git
 [![Sources](https://img.shields.io/badge/OSINT%20sources-31-cyan)](#data-sources-31)
 [![Docker](https://img.shields.io/badge/docker-ready-blue?logo=docker)](#docker)
 
-</div>
 
-CrucixExpanded pulls satellite fire detection, flight tracking, radiation monitoring, satellite constellation tracking, economic indicators, live market prices, conflict data, sanctions lists, and social sentiment from 31 open-source intelligence feeds — in parallel, every 15 minutes — and renders everything on a single self-contained Jarvis-style dashboard.
-
-Maintained by J4ck3LSyN-Gen2.
-
-Hook it up to an LLM and it becomes a **two-way intelligence assistant** — pushing multi-tier alerts to Telegram and Discord when something meaningful changes, responding to commands like `/brief` and `/sweep` from your phone, and generating actionable trade ideas grounded in real cross-domain data. Your own analyst that watches the world while you sleep.
-
-No cloud. No telemetry. No subscriptions. Just `node server.mjs` and you're running.
 
 ---
 
+## Fork Focus
+
+This repo is not a stock mirror of the original project. The current fork has been pushed toward two priorities:
+
+1. **Cybersecurity as a first-class intelligence layer**: NIST NVD, CISA KEV, FIRST EPSS, GreyNoise watchlists, ransomware-linked KEV correlation, and curated cyber RSS ingestion are surfaced directly in the dashboard instead of being treated as secondary metadata.
+2. **Operator-facing dashboard expansion**: more map controls, region filters, theme switching, sweep deltas, live tickers, signal panels, panel minimization, and a flatter workflow for watching multiple domains at once.
+
+The result is a local intelligence console that still covers geopolitical, economic, infrastructure, maritime, space, and social signals, but with noticeably more weight on cyber threat visibility and day-to-day dashboard usability.
+
 ## Why This Exists
 
-Most of the world's real-time intelligence — satellite imagery, radiation levels, conflict events, economic indicators, flight tracking, maritime activity — is publicly available. It's just scattered across dozens of government APIs, research institutions, and open data feeds that nobody has time to check individually.
+Most of the world's real-time intelligence is public: vulnerability disclosures, exploited CVEs, conflict events, satellite detections, flight movement, maritime chokepoints, macro indicators, and breaking headlines. The problem is that it is fragmented across too many feeds to monitor cleanly.
 
-CrucixExpanded brings it all into one place. Not behind a paywall, not locked in an enterprise platform, not requiring a security clearance. Just open data, aggregated and cross-correlated on your own machine, updated every 15 minutes.
+CrucixExpanded pulls those streams into one local system, correlates them, and keeps the dashboard current on an automated sweep cycle. For this fork, the emphasis is less "generic world dashboard" and more "practical operator console" with stronger cyber context and better real-time situational awareness.
 
-It was built for anyone who wants to understand what's actually happening in the world right now — researchers, journalists, traders, OSINT analysts, or just curious people who believe access to information shouldn't depend on your budget.
+It is built for users who want cross-domain visibility without buying into a closed platform: analysts, builders, defenders, researchers, and anyone who wants a live picture of what is changing across cyber, geopolitical, and market environments.
+
+---
+
+## Screenshots
+
+### Boot Sequence
+
+![CrucixExpanded boot sequence](docs/boot.png)
+
+### Dashboard Themes
+
+Amber theme with the cyber watch stack, sweep delta, live ticker, and expanded flat-map view:
+
+![CrucixExpanded dashboard in amber theme](docs/dashGold.png)
+
+Phantom theme variant of the same operator layout:
+
+![CrucixExpanded dashboard in phantom theme](docs/dashMidnight.png)
+
+Blood theme for higher-contrast alert monitoring:
+
+![CrucixExpanded dashboard in blood theme](docs/dashRed.png)
+
+### Expanded Map View
+
+Flat-map mode with chokepoints, conflict clusters, air corridors, OSINT events, and infrastructure overlays:
+
+![CrucixExpanded expanded flat map](docs/newMap.png)
 
 ---
 
@@ -61,25 +94,27 @@ Dashboard at `http://localhost:3117`. Sweep data persists in the Docker-managed 
 
 ### Live Dashboard
 A self-contained Jarvis-style HUD with:
+- **Cyber watch panel** — top CVEs, KEV additions, EPSS high-risk items, ransomware-linked entries, and GreyNoise watchlist visibility
+- **Cyber incident stream** — dedicated ransomware/DDoS/cyberattack tracking with keyword tagging and priority scoring
+- **EPSS -> NIST -> CISA correlation** — exploitability-focused vulnerability prioritization instead of raw CVE volume
+- **Sweep delta panel** — new signals, escalations, de-escalations, and critical change tracking between runs
+- **Theme switcher** — terminal, amber, blood, ice, and phantom dashboard palettes
 - **3D WebGL globe** (Globe.gl) with atmosphere glow, star field, and smooth rotation — plus a classic flat map toggle
 - **9 marker types** across both views: fire detections, air traffic, radiation sites, maritime chokepoints, SDR receivers, OSINT events, health alerts, geolocated news, conflict events
 - **Animated 3D flight corridor arcs** between air traffic hotspots and global hubs
 - **Region filters** (World, Americas, Europe, Middle East, Asia Pacific, Africa) — rotates the globe or zooms the flat map
 - **Map sizing + collapse controls** — compact/default/expanded map heights with quick minimize
 - **Panel prioritization + minimization** — drag/drop reorder and per-panel collapse with local persistence
-- **Theme + layer controls** — terminal/amber/blood/ice/phantom themes and fast layer toggles
+- **Theme + layer controls** — fast layer toggles alongside the dashboard theme system
 - **Live market data** — indexes, crypto, energy, commodities via Yahoo Finance (no API key needed)
 - **Risk gauges** — VIX, high-yield spread, supply chain pressure index
 - **OSINT feed** — English-language posts from 17 Telegram intelligence channels (expandable)
 - **Expanded no-key cyber OSINT** — ransomware/DDoS/cyberattack-focused feeds with keyword tagging and priority scoring
 - **News ticker** — merged RSS + GDELT headlines + Telegram posts, auto-scrolling
-- **Sweep delta** — live panel showing what changed since last sweep (new signals, escalations, de-escalations with severity)
-- **Cyber watch + EPSS→NIST correlation** — NIST/CISA/EPSS/GreyNoise convergence for exploit prioritization
-- **Cyber incident stream** — dedicated panel for priority cyberattack/ransomware/DDoS incidents
 - **Cross-source signals** — correlated intelligence across satellite, economic, conflict, and social domains
 - **Nuclear watch** — real-time radiation readings from Safecast + EPA RadNet
 - **Space watch** — CelesTrak satellite tracking: recent launches, ISS, military constellations, Starlink/OneWeb counts
-- **Leverageable ideas** — AI-generated trade ideas (with LLM) or sigtenal-correlated ideas (without)
+- **Leverageable ideas** — AI-generated trade ideas (with LLM) or signal-correlated ideas (without)
 
 ### Auto-Refresh
 The server runs a sweep cycle every 15 minutes (configurable). Each cycle:
@@ -462,21 +497,6 @@ Check these in order:
 
 ---
 
-## Screenshots
-
-The `docs/` folder contains dashboard screenshots referenced by this README:
-
-| File | Description |
-|------|-------------|
-| `docs/dashboard.png` | Full dashboard — hero image at the top of this README |
-| `docs/boot.png` | Cinematic boot sequence animation |
-| `docs/map.png` | D3 world map with marker types and flight arcs |
-| `docs/globe.png` | 3D WebGL globe view with atmosphere glow and markers |
-
-To update them: run the dashboard, wait for a sweep to complete, then use your browser's DevTools (`F12` → `Ctrl+Shift+P` → "Capture full size screenshot") or a tool like [LICEcap](https://www.cockos.com/licecap/) for GIFs.
-
----
-
 ## Contributing
 
 Found a bug? Want to add a 32nd source? PRs welcome. Each source is a standalone module in `apis/sources/` — just export a `briefing()` function that returns structured data and add it to the orchestrator in `apis/briefing.mjs`.
@@ -484,12 +504,6 @@ Found a bug? Want to add a 32nd source? PRs welcome. Each source is a standalone
 If you find this useful, a star helps others find it too.
 
 For contribution guidelines, review expectations, and source-add rules, see `CONTRIBUTING.md`. For security reports, see `SECURITY.md`.
-
-## Contact
-
-For partnerships, integrations, or other non-issue inquiries, you can reach me at `celesthioailabs@gmail.com`.
-
-For bugs and feature requests, please use GitHub Issues so discussion stays visible and actionable.
 
 ---
 
