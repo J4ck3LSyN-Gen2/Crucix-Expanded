@@ -74,8 +74,10 @@ Flat-map mode with chokepoints, conflict clusters, air corridors, OSINT events, 
 # 1. Clone the repo
 git clone https://github.com/J4ck3LSyN-Gen2/Crucix-Expanded.git
 cd crucixExpanded
+
 # 2. Edit the .env & add keys...
 cp .env.example .env
+
 # 3. Run the container 
 sudo docker-compose up --build -d
 sudo docker-compose logs -f crucix
