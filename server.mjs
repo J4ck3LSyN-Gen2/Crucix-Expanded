@@ -228,6 +228,67 @@ if (discordAlerter.isConfigured) {
 // === Express Server ===
 const app = express();
 app.disable('x-powered-by');
+
+// ─── Authentication Logic ──────────────────────────────────────────────
+
+const loginFails = new Map(); // ip -> { count, lastAt }
+const AUTH_ENABLED = !!(config.auth.username && config.auth.password);
+
+const getCooldown = (count) => {
+  if (count < 5) return 0;
+  // Incremental: 1m, 2m, 4m, 8m, 15m, 30m, 60m
+  const cooldowns = [60, 120, 240, 480, 900, 1800, 3600];
+  return (cooldowns[Math.min(count - 5, cooldowns.length - 1)] || 3600) * 1000;
+};
+
+const isAuthenticated = (req) => {
+  if (!AUTH_ENABLED) return true;
+  const cookie = req.headers.cookie || '';
+  const expected = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString('base64');
+  return cookie.includes(`cx_auth=${expected}`);
+};
+
+app.use(express.json());
+
+app.post('/login', (req, res) => {
+  const ip = req.ip;
+  const record = loginFails.get(ip) || { count: 0, lastAt: 0 };
+  
+  const wait = getCooldown(record.count);
+  const remaining = Math.ceil((record.lastAt + wait - Date.now()) / 1000);
+  
+  if (remaining > 0) {
+    return res.status(429).json({ error: `RETRY IN ${remaining}s` });
+  }
+
+  const { user, pass } = req.body;
+  if (user === config.auth.username && pass === config.auth.password) {
+    loginFails.delete(ip);
+    const token = Buffer.from(`${user}:${pass}`).toString('base64');
+    res.setHeader('Set-Cookie', `cx_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=86400`);
+    return res.json({ ok: true });
+  }
+
+  record.count++;
+  record.lastAt = Date.now();
+  loginFails.set(ip, record);
+  
+  const status = record.count >= 5 ? 429 : 401;
+  const error = record.count >= 5 ? 'MAX ATTEMPTS — COOLDOWN ACTIVE' : 'INVALID OPERATOR ID OR ACCESS CODE';
+  res.status(status).json({ error });
+});
+
+app.use((req, res, next) => {
+  const publicPaths = ['/login', '/login.html'];
+  if (AUTH_ENABLED && !publicPaths.includes(req.path) && !isAuthenticated(req)) {
+    if (req.path.startsWith('/api') || req.path === '/events') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    return res.redirect('/login.html');
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
