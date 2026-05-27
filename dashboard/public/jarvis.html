@@ -348,16 +348,40 @@ body.theme-phantom{
   --text:#e8d4ff;--dim:#6a4880;--accent:#a050ff;--accent2:#cc80ff;
   --warn:#ffb84c;--danger:#ff5f63;
   --grid-c:rgba(160,80,255,0.03);--r1:rgba(60,20,120,0.18);--r2:rgba(40,10,90,0.09);--sc:rgba(160,80,255,0.12);}
+body.theme-kali{
+  --bg:#0f0f0f;--panel:rgba(20,20,20,0.88);--glass:rgba(25,25,25,0.6);
+  --border:rgba(0,255,255,0.14);--border-bright:rgba(0,255,255,0.32);
+  --text:#e0f7f7;--dim:#5a8a8a;--accent:#00ccff;--accent2:#00ffff;
+  --warn:#ffab40;--danger:#ff4d4d;
+  --grid-c:rgba(0,255,255,0.03);--r1:rgba(0,80,120,0.14);--r2:rgba(0,60,100,0.08);--sc:rgba(0,255,255,0.12);}
+body.theme-tulip{
+  --bg:#1a0a14;--panel:rgba(30,10,25,0.88);--glass:rgba(35,12,30,0.6);
+  --border:rgba(255,105,180,0.14);--border-bright:rgba(255,105,180,0.32);
+  --text:#ffe4f1;--dim:#a66a8a;--accent:#ff69b4;--accent2:#ffb6c1;
+  --warn:#ff9800;--danger:#ff1493;
+  --grid-c:rgba(255,105,180,0.03);--r1:rgba(120,40,80,0.14);--r2:rgba(100,30,60,0.08);--sc:rgba(255,105,180,0.12);}
+body.theme-rose{
+  --bg:#0a0005;--panel:rgba(25,0,10,0.88);--glass:rgba(30,0,15,0.6);
+  --border:rgba(255,0,127,0.14);--border-bright:rgba(255,0,127,0.32);
+  --text:#fff0f5;--dim:#8a4060;--accent:#e91e63;--accent2:#9c27b0;
+  --warn:#ff5722;--danger:#d81b60;
+  --grid-c:rgba(255,0,127,0.03);--r1:rgba(120,10,50,0.18);--r2:rgba(80,5,30,0.09);--sc:rgba(255,0,127,0.12);}
+body.theme-spy{
+  --bg:#0a0a0c;--panel:rgba(20,20,22,0.88);--glass:rgba(24,24,28,0.6);
+  --border:rgba(192,192,192,0.14);--border-bright:rgba(192,192,192,0.32);
+  --text:#f0f0f5;--dim:#808090;--accent:#c0c0c0;--accent2:#e0e0e0;
+  --warn:#ffd700;--danger:#ff4444;
+  --grid-c:rgba(192,192,192,0.03);--r1:rgba(100,100,110,0.14);--r2:rgba(60,60,70,0.08);--sc:rgba(192,192,192,0.12);}
 
 /* THEME PANEL */
 #themePanel{position:fixed;top:58px;right:12px;z-index:600;background:var(--panel);border:1px solid var(--border-bright);backdrop-filter:blur(20px);padding:14px 16px;min-width:220px;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
 #themePanel.open{display:block}
 #themePanel h4{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
-.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:4px}
-.theme-swatch{position:relative;width:100%;padding-top:100%;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,0.08);transition:transform 0.2s,border-color 0.2s}
-.theme-swatch:hover,.theme-swatch.active{border-color:rgba(255,255,255,0.6);transform:scale(1.12)}
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px;margin-bottom:4px}
+.theme-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.theme-swatch{position:relative;width:100%;padding-top:100%;border-radius:50%;border:2px solid rgba(255,255,255,0.08);transition:transform 0.2s,border-color 0.2s}
+.theme-item:hover .theme-swatch,.theme-swatch.active{border-color:rgba(255,255,255,0.6);transform:scale(1.12)}
 .theme-swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
-.theme-names{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
 .theme-name-lbl{font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* SETTINGS PANEL */
@@ -443,18 +467,42 @@ body.theme-phantom{
 <div id="themePanel">
   <h4>Color Theme</h4>
   <div class="theme-grid">
-    <div class="theme-swatch" data-theme="terminal" style="background:linear-gradient(135deg,#020408,#64f0c8)" onclick="applyTheme('terminal')"></div>
-    <div class="theme-swatch" data-theme="amber" style="background:linear-gradient(135deg,#0a0700,#ffb830)" onclick="applyTheme('amber')"></div>
-    <div class="theme-swatch" data-theme="blood" style="background:linear-gradient(135deg,#060002,#f03c50)" onclick="applyTheme('blood')"></div>
-    <div class="theme-swatch" data-theme="ice" style="background:linear-gradient(135deg,#00040c,#3c8cff)" onclick="applyTheme('ice')"></div>
-    <div class="theme-swatch" data-theme="phantom" style="background:linear-gradient(135deg,#04000a,#a050ff)" onclick="applyTheme('phantom')"></div>
-  </div>
-  <div class="theme-names">
-    <span class="theme-name-lbl">Terminal</span>
-    <span class="theme-name-lbl">Amber</span>
-    <span class="theme-name-lbl">Blood</span>
-    <span class="theme-name-lbl">Ice</span>
-    <span class="theme-name-lbl">Phantom</span>
+    <div class="theme-item" onclick="applyTheme('terminal')">
+      <div class="theme-swatch" data-theme="terminal" style="background:linear-gradient(135deg,#020408,#64f0c8)"></div>
+      <span class="theme-name-lbl">Terminal</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('amber')">
+      <div class="theme-swatch" data-theme="amber" style="background:linear-gradient(135deg,#0a0700,#ffb830)"></div>
+      <span class="theme-name-lbl">Amber</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('blood')">
+      <div class="theme-swatch" data-theme="blood" style="background:linear-gradient(135deg,#060002,#f03c50)"></div>
+      <span class="theme-name-lbl">Blood</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('ice')">
+      <div class="theme-swatch" data-theme="ice" style="background:linear-gradient(135deg,#00040c,#3c8cff)"></div>
+      <span class="theme-name-lbl">Ice</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('phantom')">
+      <div class="theme-swatch" data-theme="phantom" style="background:linear-gradient(135deg,#04000a,#a050ff)"></div>
+      <span class="theme-name-lbl">Phantom</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('kali')">
+      <div class="theme-swatch" data-theme="kali" style="background:linear-gradient(135deg,#0f0f0f,#00ccff)"></div>
+      <span class="theme-name-lbl">Kali</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('tulip')">
+      <div class="theme-swatch" data-theme="tulip" style="background:linear-gradient(135deg,#1a0a14,#ff69b4)"></div>
+      <span class="theme-name-lbl">Tulip</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('rose')">
+      <div class="theme-swatch" data-theme="rose" style="background:linear-gradient(135deg,#0a0005,#e91e63)"></div>
+      <span class="theme-name-lbl">Rose</span>
+    </div>
+    <div class="theme-item" onclick="applyTheme('spy')">
+      <div class="theme-swatch" data-theme="spy" style="background:linear-gradient(135deg,#0a0a0c,#c0c0c0)"></div>
+      <span class="theme-name-lbl">SPY</span>
+    </div>
   </div>
 </div>
 <!-- LAYOUT PANEL -->
@@ -522,22 +570,22 @@ const regionPOV = {
 
 const LAYOUT_PRESETS = {
   default: {
-    leftRail: ['sensor-grid', 'nuclear-watch', 'risk-gauges', 'space-watch', 'cyber-watch'],
+    leftRail: ['sensor-grid', 'nuclear-watch', 'risk-gauges', 'space-watch', 'cve-monitor', 'cyber-watch'],
     lowerGrid: ['sweep-delta', 'live-news', 'macro-metrics', 'ideas-panel'],
     rightRail: ['cross-source-signals', 'cyber-incident-stream', 'osint-stream', 'signal-core'],
     minimized: []
   },
   conflict: {
-    leftRail: ['sensor-grid', 'nuclear-watch', 'space-watch', 'risk-gauges'],
+    leftRail: ['sensor-grid', 'nuclear-watch', 'space-watch', 'risk-gauges', 'cve-monitor'],
     lowerGrid: ['live-news', 'osint-stream', 'sweep-delta', 'ideas-panel'],
     rightRail: ['cross-source-signals', 'signal-core', 'macro-metrics', 'cyber-incident-stream'],
     minimized: ['cyber-watch']
   },
   engagement: {
-    leftRail: ['sensor-grid', 'ideas-panel', 'sweep-delta'],
-    lowerGrid: ['cyber-watch', 'cyber-incident-stream', 'osint-stream'],
-    rightRail: ['risk-gauges', 'macro-metrics', 'cross-source-signals'],
-    minimized: ['nuclear-watch','live-news','space-watch']
+    leftRail: ['sensor-grid', 'ideas-panel', 'sweep-delta','live-news','cyber-incident-stream'],
+    lowerGrid: ['cve-monitor', 'cyber-watch'],
+    rightRail: ['risk-gauges', 'macro-metrics', 'cross-source-signals','osint-stream'],
+    minimized: ['nuclear-watch','live-news','space-watch','macro-metrics','sensor-grid','risk-gauges']
   }
 };
 
@@ -730,12 +778,16 @@ function renderLeftRail(){
         ${(D.space.signals||[]).length ? `<div style="margin-top:6px;padding:6px 8px;border:1px solid rgba(68,204,255,0.2);background:rgba(68,204,255,0.04);font-family:var(--mono);font-size:9px;color:var(--accent2);line-height:1.5">${D.space.signals.slice(0,2).join('<br>')}</div>` : ''}
       ` : '<div style="font-family:var(--mono);font-size:10px;color:var(--dim)">NO SPACE DATA</div>'}
     </div>
+    <div class="g-panel" id="cvePanel" data-panel-id="cve-monitor">
+      ${renderCvePanel()}
+    </div>
     <div class="g-panel" id="cyberPanel" data-panel-id="cyber-watch">
       ${renderCyberPanel()}
     </div>`;
 
   if (!layerSettings.cyber) {
-    document.getElementById('cyberPanel').style.display = 'none';
+    if(document.getElementById('cyberPanel')) document.getElementById('cyberPanel').style.display = 'none';
+    if(document.getElementById('cvePanel')) document.getElementById('cvePanel').style.display = 'none';
   }
 }
 
@@ -1755,7 +1807,7 @@ function initializePanelLayout(){
 }
 
 // === THEME SYSTEM ===
-const THEMES = ['terminal','amber','blood','ice','phantom'];
+const THEMES = ['terminal','amber','blood','ice','phantom','kali','tulip','rose','spy'];
 function applyTheme(name) {
   if (!THEMES.includes(name)) name = 'terminal';
   document.body.className = name === 'terminal' ? '' : `theme-${name}`;
@@ -1874,6 +1926,8 @@ function toggleLayer(key) {
   if (key === 'cyber') {
     const cp = document.getElementById('cyberPanel');
     if (cp) cp.style.display = layerSettings.cyber ? '' : 'none';
+    const cvep = document.getElementById('cvePanel');
+    if (cvep) cvep.style.display = layerSettings.cyber ? '' : 'none';
   }
 }
 
@@ -1897,22 +1951,48 @@ function renderCyberTicker() {
   container.innerHTML = `<div class="ticker-marquee">${tickerHtml}${tickerHtml}</div>`;
 }
 
+function renderCvePanel() {
+  const nist = D.nist || {};
+  if (!nist.total && !nist.recent?.length) {
+    return `<div class="sec-head"><h3>CVE Monitor</h3><span class="badge">OFFLINE</span></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);padding:8px 0">NIST Feed Unavailable</div>`;
+  }
+  const topCves = (nist.recent || []).slice(0, 5).map(c => `
+    <div class="cve-row" style="flex-direction:column; align-items:flex-start; gap:4px; padding: 8px 0; border-bottom: 1px solid var(--border)">
+      <div style="display:flex; align-items:center; gap:8px">
+        <span class="cve-badge ${c.severity}">${c.id}</span>
+        <span class="cve-score ${c.severity}">${c.score??'?'}</span>
+        <span class="badge" style="font-size:8px; border-color:var(--border-bright); opacity:0.8; letter-spacing: 0.05em">${c.severity}</span>
+      </div>
+      <div class="cve-desc" style="display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.4">
+        <span style="color:var(--dim); font-family:var(--mono); font-size:9px; text-transform:uppercase">Note:</span> ${cleanText(c.desc||'')}
+      </div>
+    </div>`).join('');
+
+  const content = `
+    <div class="cve-stats-container">
+      <div class="cyber-stat"><span class="cl">CVEs (7d hi/crit)</span><span class="cv" style="color:var(--warn)">${nist.highCount||0}H + ${nist.criticalCount||0}C</span></div>
+    </div>
+    <div class="cve-list-container">
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Top CVEs</div>
+      ${topCves||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No high/critical CVEs this week</div>'}
+    </div>`;
+
+  return `
+    <div class="sec-head"><h3>CVE Monitor</h3><span class="badge">NIST</span></div>
+    <div class="g-panel-content">${content}</div>`;
+}
+
 function renderCyberPanel() {
   const nist = D.nist || {};
   const cisa = D.cisa || {};
   const epss = D.epss || {};
   const greynoise = D.greynoise || {};
   const correlation = D.cyberCorrelation || {};
-  if (!nist.total && !cisa.kevTotal && !epss.total && !greynoise.totalChecked) {
-    return `<div class="sec-head"><h3>Cyber Watch</h3><span class="badge">OFFLINE</span></div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);padding:8px 0">NIST &amp; CISA feeds unavailable</div>`;
+  if (!cisa.kevTotal && !epss.total && !greynoise.totalChecked) {
+    return `<div class="sec-head"><h3>Cyber Intelligence</h3><span class="badge">OFFLINE</span></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--dim);padding:8px 0">Cyber Intel feeds unavailable</div>`;
   }
-  const topCves = (nist.recent || []).slice(0, 4).map(c => `
-    <div class="cve-row">
-      <span class="cve-badge ${c.severity}">${c.id}</span>
-      <span class="cve-score ${c.severity}">${c.score??'?'}</span>
-      <span class="cve-desc">${cleanText(c.desc||'')}</span>
-    </div>`).join('');
   const kevRows = (cisa.kevRecent || []).slice(0, 4).map(k => `
     <div class="kev-row${k.ransomware?' ransomware':''}">
       <div class="kev-vendor">${k.vendor||'?'} · ${k.product||'?'}${k.ransomware?' ⚠ RANSOMWARE':''}</div>
@@ -1940,7 +2020,6 @@ function renderCyberPanel() {
 
   const content = `
     <div class="cyber-sec-stats">
-      <div class="cyber-stat"><span class="cl">CVEs (7d hi/crit)</span><span class="cv" style="color:var(--warn)">${nist.highCount||0}H + ${nist.criticalCount||0}C</span></div>
       <div class="cyber-stat"><span class="cl">CISA KEV Total</span><span class="cv">${cisa.kevTotal||0}</span></div>
       <div class="cyber-stat"><span class="cl">KEV Added (30d)</span><span class="cv" style="color:var(--warn)">${cisa.kevRecentCount||0}</span></div>
       <div class="cyber-stat"><span class="cl">EPSS High Risk</span><span class="cv" style="color:var(--accent2)">${epss.highRiskCount||0}</span></div>
@@ -1949,10 +2028,6 @@ function renderCyberPanel() {
       <div class="cyber-stat"><span class="cl">GreyNoise Hits</span><span class="cv">${greynoise.noisy||0}/${greynoise.totalChecked||0}</span></div>
       ${cisa.ransomwareCount?`<div class="cyber-stat"><span class="cl">Ransomware-linked</span><span class="cv" style="color:var(--danger)">${cisa.ransomwareCount}</span></div>`:''}
       ${correlation.ransomwareOverlapCount?`<div class="cyber-stat"><span class="cl">Correlated Ransomware</span><span class="cv" style="color:var(--danger)">${correlation.ransomwareOverlapCount}</span></div>`:''}
-    </div>
-    <div class="cyber-sec-cves">
-      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Top CVEs</div>
-      ${topCves||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No high/critical CVEs this week</div>'}
     </div>
     <div class="cyber-sec-corr">
       <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS → NIST Priorities</div>
@@ -1972,7 +2047,7 @@ function renderCyberPanel() {
     </div>`;
 
   return `
-    <div class="sec-head"><h3>Cyber Watch</h3><span class="badge">LIVE</span></div>
+    <div class="sec-head"><h3>Cyber Intelligence</h3><span class="badge">LIVE</span></div>
     <div class="g-panel-content">${content}</div>`;
 }
 
@@ -2069,6 +2144,7 @@ let booted = false;
 function init(){
   renderTopbar();renderLeftRail();renderLower();renderRight();
   initializePanelLayout();
+  renderCyberTicker();
   initMap();
   if (!booted) { runBoot(); booted = true; }
   // Close popup on click outside markers
