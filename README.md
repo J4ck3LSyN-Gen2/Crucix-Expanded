@@ -85,7 +85,7 @@ cp .env.example .env
 
 # 3. Run the container 
 docker compose up --build -d
-docker compose logs -f crucix
+docker compose logs -f crucix-live
 ```
 
 ### Down the container
@@ -135,6 +135,8 @@ The server runs a sweep cycle every 15 minutes (configurable). Each cycle:
 ### Telegram Bot (Two-Way)
 cruxable doubles as an interactive Telegram bot. Beyond sending alerts, it responds to commands directly from your chat:
 
+> _NOTE:_ I plan on possibly migrating or removing this functionality to lower the attack surface..
+
 | Command | What It Does |
 |---------|-------------|
 | `/status` | System health, last sweep time, source status, LLM status |
@@ -151,6 +153,8 @@ This requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in `.env`. The bot pol
 ### Discord Bot (Two-Way)
 
 cruxable also supports Discord as a full-featured bot with slash commands and rich embed alerts. It mirrors the Telegram bot's capabilities with Discord-native formatting.
+
+> _NOTE:_ Due to the information-gathering methodology of Discord with its changes as of 2026, this will either be removed or hidden and need to be manually flagged...
 
 | Command | What It Does |
 |---------|-------------|
