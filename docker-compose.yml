@@ -1,18 +1,19 @@
-version: '3.8'
 services:
   crucix:
     build: .
+    container_name: crucix-live
     ports:
       - "127.0.0.1:${PORT:-3117}:${PORT:-3117}"
     env_file:
       - .env
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     read_only: true
     tmpfs:
       - /tmp
     security_opt:
       - no-new-privileges:true
-    cap_drop:
-      - ALL
     volumes:
       - crucix_runs:/app/runs
     restart: unless-stopped
