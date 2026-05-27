@@ -2170,7 +2170,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (isServer) {
     // Server mode: always fetch live data from API (ignore any stale inline D)
     fetch('/api/data')
-      .then(r => r.json())
+      .then(r => {
+        if (r.status === 401) { location.replace('/login.html'); throw 'Unauthorized'; }
+        return r.json();
+      })
       .then(data => { D = data; init(); connectSSE(); })
       .catch(() => {
         // Should not reach here — server routes to loading.html when no data
