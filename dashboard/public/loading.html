@@ -119,7 +119,10 @@ function startCountdown(elapsedSeconds) {
 
 // Fetch health to get elapsed time since sweep started
 fetch('/api/health')
-  .then(r => r.json())
+  .then(r => {
+    if (r.status === 401) { location.replace('/login.html'); throw 'Unauthorized'; }
+    return r.json();
+  })
   .then(h => {
     let elapsed = 0;
     if (h.sweepStartedAt) {
