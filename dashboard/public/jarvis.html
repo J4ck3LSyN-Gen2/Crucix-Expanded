@@ -61,6 +61,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .meta-pill .v{color:var(--text);font-weight:500}
 .alert-badge{padding:5px 12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border:1px solid rgba(255,95,99,0.4);color:#fff;background:linear-gradient(135deg,rgba(255,95,99,0.2),rgba(255,95,99,0.08))}
 
+/* CYBER TICKER */
+#cyberTicker{height:28px;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-top:none;display:flex;align-items:center;overflow:hidden;position:relative;z-index:50}
+.ticker-label{flex:0 0 auto;padding:0 12px;height:100%;display:flex;align-items:center;background:var(--accent);color:var(--bg);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase}
+.ticker-content{flex:1;white-space:nowrap;display:flex;align-items:center;padding-left:20px}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;margin-right:40px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.ticker-item .cve-id{color:var(--accent2);font-weight:600}
+.ticker-item .cve-sev{padding:1px 4px;border-radius:2px;font-size:9px;font-weight:700}
+.ticker-item .cve-sev.CRITICAL{background:rgba(255,95,99,0.2);color:var(--danger);border:1px solid rgba(255,95,99,0.4)}
+.ticker-item .cve-sev.HIGH{background:rgba(255,184,76,0.15);color:var(--warn);border:1px solid rgba(255,184,76,0.3)}
+.ticker-item .cve-txt{color:var(--text);opacity:0.8;max-width:400px;overflow:hidden;text-overflow:ellipsis}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-marquee { display: flex; animation: marquee 60s linear infinite; }
+.ticker-marquee:hover { animation-play-state: paused; }
+
 /* GRID */
 .grid{display:grid;grid-template-columns:240px 1fr 340px;gap:10px;margin-top:10px;min-height:calc(100vh - 100px)}
 .col{display:flex;flex-direction:column;gap:10px}
@@ -347,6 +365,12 @@ body.theme-phantom{
 #settingsPanel.open{display:block}
 #settingsPanel h4{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
 .setting-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;user-select:none}
+
+/* LAYOUT PANEL */
+#layoutPanel{position:fixed;top:58px;right:12px;z-index:600;background:var(--panel);border:1px solid var(--border-bright);backdrop-filter:blur(20px);padding:14px 16px;min-width:220px;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+#layoutPanel.open{display:block}
+#layoutPanel h4{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+
 .setting-row .sl{font-family:var(--mono);font-size:11px;color:var(--text)}
 .setting-row .ss{font-size:9px;color:var(--dim);margin-top:1px}
 .toggle-sw{width:30px;height:16px;border-radius:8px;background:rgba(255,255,255,0.08);border:1px solid var(--border);position:relative;transition:background 0.2s;flex-shrink:0}
@@ -433,6 +457,11 @@ body.theme-phantom{
     <span class="theme-name-lbl">Phantom</span>
   </div>
 </div>
+<!-- LAYOUT PANEL -->
+<div id="layoutPanel">
+  <h4>Operator Layouts</h4>
+  <div id="layoutList"></div>
+</div>
 <!-- SETTINGS PANEL -->
 <div id="settingsPanel">
   <h4>Layer Settings</h4>
@@ -440,6 +469,9 @@ body.theme-phantom{
 </div>
 <div id="main">
   <div class="topbar" id="topbar"></div>
+  <div id="cyberTicker">
+    <div class="ticker-content" id="cyberTickerContent"></div>
+  </div>
   <div class="grid">
     <div class="col" id="leftRail" data-drop-zone="leftRail"></div>
     <div class="col" id="centerCol">
@@ -487,6 +519,51 @@ const regionPOV = {
   asiaPacific: { lat: 25, lng: 110, altitude: 1.6 },
   africa: { lat: 5, lng: 20, altitude: 1.5 }
 };
+
+const LAYOUT_PRESETS = {
+  default: {
+    leftRail: ['sensor-grid', 'nuclear-watch', 'risk-gauges', 'space-watch', 'cyber-watch'],
+    lowerGrid: ['sweep-delta', 'live-news', 'macro-metrics', 'ideas-panel'],
+    rightRail: ['cross-source-signals', 'cyber-incident-stream', 'osint-stream', 'signal-core'],
+    minimized: []
+  },
+  conflict: {
+    leftRail: ['sensor-grid', 'nuclear-watch', 'space-watch', 'risk-gauges'],
+    lowerGrid: ['live-news', 'osint-stream', 'sweep-delta', 'ideas-panel'],
+    rightRail: ['cross-source-signals', 'signal-core', 'macro-metrics', 'cyber-incident-stream'],
+    minimized: ['cyber-watch']
+  },
+  engagement: {
+    leftRail: ['sensor-grid', 'ideas-panel', 'sweep-delta'],
+    lowerGrid: ['cyber-watch', 'cyber-incident-stream', 'osint-stream'],
+    rightRail: ['risk-gauges', 'macro-metrics', 'cross-source-signals'],
+    minimized: ['nuclear-watch','live-news','space-watch']
+  }
+};
+
+function applyLayoutPreset(type) {
+  const preset = LAYOUT_PRESETS[type];
+  if (!preset) return;
+
+  // Reset minimization first
+  minimizedPanels = {};
+  preset.minimized?.forEach(id => minimizedPanels[id] = true);
+  savePanelMinimized(minimizedPanels);
+
+  const layout = {
+    leftRail: preset.leftRail,
+    lowerGrid: preset.lowerGrid,
+    rightRail: preset.rightRail
+  };
+  
+  if (type === 'default') {
+    localStorage.removeItem(PANEL_LAYOUT_KEY);
+  } else {
+    savePanelLayout(layout);
+  }
+  
+  location.reload(); // Refresh to apply structural grid changes
+}
 
 function normalizeMapLayout(layout) {
   return {
@@ -585,6 +662,7 @@ function renderTopbar(){
       <span class="meta-pill">SOURCES <span class="v">${D.meta.sourcesOk}/${D.meta.sourcesQueried}</span></span>
       ${D.delta?.summary ? `<span class="meta-pill">DELTA <span class="v">${D.delta.summary.direction==='risk-off'?'&#x25B2; RISK-OFF':D.delta.summary.direction==='risk-on'?'&#x25BC; RISK-ON':'&#x25C6; MIXED'}</span></span>` : ''}
       <span class="alert-badge">HIGH ALERT</span>
+      <button class="icon-btn" id="layoutBtn" onclick="toggleLayoutPanel()" title="Operator Layouts">&#9638;</button>
       <button class="icon-btn" id="settingsBtn" onclick="toggleSettingsPanel()" title="Layer Settings">&#9881;</button>
       <button class="icon-btn" id="themeBtn" onclick="toggleThemePanel()" title="Color Theme">&#9643;</button>
     </div>`;
@@ -1696,6 +1774,7 @@ function toggleThemePanel() {
   const btn = document.getElementById('themeBtn');
   sp.classList.remove('open');
   document.getElementById('settingsBtn').classList.remove('active');
+  document.getElementById('layoutPanel').classList.remove('open');
   const open = tp.classList.toggle('open');
   btn.classList.toggle('active', open);
 }
@@ -1704,21 +1783,53 @@ function toggleSettingsPanel() {
   const tp = document.getElementById('themePanel');
   const btn = document.getElementById('settingsBtn');
   tp.classList.remove('open');
+  document.getElementById('layoutPanel').classList.remove('open');
   document.getElementById('themeBtn').classList.remove('active');
   const open = sp.classList.toggle('open');
   btn.classList.toggle('active', open);
   if (open) renderSettingsList();
 }
+
+function toggleLayoutPanel() {
+  const lp = document.getElementById('layoutPanel');
+  const tp = document.getElementById('themePanel');
+  const sp = document.getElementById('settingsPanel');
+  const btn = document.getElementById('layoutBtn');
+  tp.classList.remove('open');
+  sp.classList.remove('open');
+  const open = lp.classList.toggle('open');
+  btn.classList.toggle('active', open);
+  if (open) renderLayoutList();
+}
+
+function renderLayoutList() {
+  const layouts = [
+    { id: 'default', label: 'Default', sub: 'Standard mission view' },
+    { id: 'custom', label: 'Custom', sub: 'User persistent layout' },
+    { id: 'conflict', label: 'Conflict Focused', sub: 'OSINT & News priority' },
+    { id: 'engagement', label: 'Engagement', sub: 'Cybersecurity priority' }
+  ];
+  document.getElementById('layoutList').innerHTML = layouts.map(l => `
+    <div class="setting-row" onclick="applyLayoutPreset('${l.id}')">
+      <div><div class="sl">${l.label}</div><div class="ss">${l.sub}</div></div>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--accent)">SELECT</div>
+    </div>`).join('');
+}
+
 // Close panels on outside click
 document.addEventListener('click', e => {
-  if (!e.target.closest('#themePanel') && !e.target.closest('#themeBtn'))
+  if (!e.target.closest('#themePanel') && !e.target.closest('#themeBtn')) {
     document.getElementById('themePanel')?.classList.remove('open');
+    document.getElementById('themeBtn')?.classList.remove('active');
+  }
   if (!e.target.closest('#settingsPanel') && !e.target.closest('#settingsBtn')) {
     document.getElementById('settingsPanel')?.classList.remove('open');
     document.getElementById('settingsBtn')?.classList.remove('active');
   }
-  if (!e.target.closest('#themePanel') && !e.target.closest('#themeBtn'))
-    document.getElementById('themeBtn')?.classList.remove('active');
+  if (!e.target.closest('#layoutPanel') && !e.target.closest('#layoutBtn')) {
+    document.getElementById('layoutPanel')?.classList.remove('open');
+    document.getElementById('layoutBtn')?.classList.remove('active');
+  }
 });
 
 // === SETTINGS / LAYER TOGGLES ===
@@ -1767,6 +1878,25 @@ function toggleLayer(key) {
 }
 
 // === CYBER WATCH PANEL ===
+function renderCyberTicker() {
+  const nist = D.nist || {};
+  const items = (nist.recent || []).slice(0, 15);
+  const container = document.getElementById('cyberTickerContent');
+  if (!items.length) {
+    container.innerHTML = '<div class="ticker-item">Awaiting Cyber Intelligence Synthesis...</div>';
+    return;
+  }
+  
+  const tickerHtml = items.map(c => `
+    <div class="ticker-item">
+      <span class="cve-id">${c.id}</span>
+      <span class="cve-sev ${c.severity}">${c.severity}</span>
+      <span class="cve-txt">${cleanText(c.desc || '').substring(0, 100)}...</span>
+    </div>`).join('');
+
+  container.innerHTML = `<div class="ticker-marquee">${tickerHtml}${tickerHtml}</div>`;
+}
+
 function renderCyberPanel() {
   const nist = D.nist || {};
   const cisa = D.cisa || {};
@@ -1807,38 +1937,38 @@ function renderCyberPanel() {
         ${entry.vendor ? `<span class="corr-meta">${cleanText(`${entry.vendor}${entry.product ? ` / ${entry.product}` : ''}`)}</span>` : ''}
       </div>
     </div>`).join('');
-  return `
-    <div class="sec-head"><h3>Cyber Watch</h3><span class="badge">LIVE</span></div>
+
+  const content = `
     <div class="cyber-sec-stats">
-    <div class="cyber-stat"><span class="cl">CVEs (7d hi/crit)</span><span class="cv" style="color:var(--warn)">${nist.highCount||0}H + ${nist.criticalCount||0}C</span></div>
-    <div class="cyber-stat"><span class="cl">CISA KEV Total</span><span class="cv">${cisa.kevTotal||0}</span></div>
-    <div class="cyber-stat"><span class="cl">KEV Added (30d)</span><span class="cv" style="color:var(--warn)">${cisa.kevRecentCount||0}</span></div>
-    <div class="cyber-stat"><span class="cl">EPSS High Risk</span><span class="cv" style="color:var(--accent2)">${epss.highRiskCount||0}</span></div>
-    <div class="cyber-stat"><span class="cl">EPSS → NIST Overlap</span><span class="cv" style="color:var(--accent2)">${correlation.overlapCount||0}</span></div>
-    <div class="cyber-stat"><span class="cl">Overlap in Recent KEV</span><span class="cv" style="color:var(--warn)">${correlation.kevOverlapCount||0}</span></div>
-    <div class="cyber-stat"><span class="cl">GreyNoise Hits</span><span class="cv">${greynoise.noisy||0}/${greynoise.totalChecked||0}</span></div>
-    ${cisa.ransomwareCount?`<div class="cyber-stat"><span class="cl">Ransomware-linked</span><span class="cv" style="color:var(--danger)">${cisa.ransomwareCount}</span></div>`:''}
-    ${correlation.ransomwareOverlapCount?`<div class="cyber-stat"><span class="cl">Correlated Ransomware</span><span class="cv" style="color:var(--danger)">${correlation.ransomwareOverlapCount}</span></div>`:''}
+      <div class="cyber-stat"><span class="cl">CVEs (7d hi/crit)</span><span class="cv" style="color:var(--warn)">${nist.highCount||0}H + ${nist.criticalCount||0}C</span></div>
+      <div class="cyber-stat"><span class="cl">CISA KEV Total</span><span class="cv">${cisa.kevTotal||0}</span></div>
+      <div class="cyber-stat"><span class="cl">KEV Added (30d)</span><span class="cv" style="color:var(--warn)">${cisa.kevRecentCount||0}</span></div>
+      <div class="cyber-stat"><span class="cl">EPSS High Risk</span><span class="cv" style="color:var(--accent2)">${epss.highRiskCount||0}</span></div>
+      <div class="cyber-stat"><span class="cl">EPSS → NIST Overlap</span><span class="cv" style="color:var(--accent2)">${correlation.overlapCount||0}</span></div>
+      <div class="cyber-stat"><span class="cl">Overlap in Recent KEV</span><span class="cv" style="color:var(--warn)">${correlation.kevOverlapCount||0}</span></div>
+      <div class="cyber-stat"><span class="cl">GreyNoise Hits</span><span class="cv">${greynoise.noisy||0}/${greynoise.totalChecked||0}</span></div>
+      ${cisa.ransomwareCount?`<div class="cyber-stat"><span class="cl">Ransomware-linked</span><span class="cv" style="color:var(--danger)">${cisa.ransomwareCount}</span></div>`:''}
+      ${correlation.ransomwareOverlapCount?`<div class="cyber-stat"><span class="cl">Correlated Ransomware</span><span class="cv" style="color:var(--danger)">${correlation.ransomwareOverlapCount}</span></div>`:''}
     </div>
     <div class="cyber-sec-cves">
-    <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Top CVEs</div>
-    ${topCves||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No high/critical CVEs this week</div>'}
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Top CVEs</div>
+      ${topCves||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No high/critical CVEs this week</div>'}
     </div>
     <div class="cyber-sec-corr">
-    <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS → NIST Priorities</div>
-    ${correlationRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS-ranked overlap with recent NIST CVEs</div>'}
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS → NIST Priorities</div>
+      ${correlationRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS-ranked overlap with recent NIST CVEs</div>'}
     </div>
     <div class="cyber-sec-kevs">
-    <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Recent KEVs</div>
-    ${kevRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No recent exploited vulns</div>'}
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Recent KEVs</div>
+      ${kevRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No recent exploited vulns</div>'}
     </div>
     <div class="cyber-sec-epss">
-    <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS Priority</div>
-    ${epssRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS high-risk CVEs</div>'}
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS Priority</div>
+      ${epssRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS high-risk CVEs</div>'}
     </div>
     <div class="cyber-sec-gn">
-    <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">GreyNoise Watchlist</div>
-    ${gnRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">GreyNoise watchlist not configured</div>'}
+      <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">GreyNoise Watchlist</div>
+      ${gnRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">GreyNoise watchlist not configured</div>'}
     </div>`;
 
   return `
@@ -1898,6 +2028,7 @@ function reinit(){
   renderTopbar();renderLeftRail();renderLower();renderRight();
   initializePanelLayout();
   renderMapStatus();
+  renderCyberTicker();
   plotMarkers();
 }
 
