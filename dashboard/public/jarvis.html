@@ -68,7 +68,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .g-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(100,240,200,0.15),transparent);pointer-events:none}
 .g-panel[draggable="true"]{cursor:grab}
 .g-panel.panel-dragging{opacity:0.45;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;cursor:grabbing}
-.g-panel.panel-drop-target{outline:1px dashed var(--accent);outline-offset:3px}
+.panel-drop-target{outline:1px dashed var(--accent);outline-offset:3px}
+[data-drop-zone]{min-height:100px;transition:background 0.3s ease}
+[data-drop-zone].panel-drop-target{background:rgba(100,240,200,0.04);outline-offset:-2px}
 .g-panel.panel-minimized{padding-bottom:10px}
 .g-panel.panel-minimized > :not(.sec-head){display:none!important}
 .g-panel.panel-minimized .sec-head{margin-bottom:0}
@@ -81,6 +83,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border:1px solid var(--border);color:var(--accent)}
 .panel-min-btn{width:18px;height:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);color:var(--dim);font-family:var(--mono);font-size:12px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:all 0.2s}
 .panel-min-btn:hover{color:var(--accent);border-color:var(--border-bright);background:rgba(100,240,200,0.05)}
+
+/* Dynamic Section Visibility (Prevents overflow during resize) */
+.g-panel[data-size-tier="nano"] :is(.cyber-sec-corr, .cyber-sec-cves, .cyber-sec-kevs, .cyber-sec-epss, .cyber-sec-gn) { display: none !important; }
+.g-panel[data-size-tier="small"] :is(.cyber-sec-cves, .cyber-sec-kevs, .cyber-sec-epss, .cyber-sec-gn) { display: none !important; }
+.g-panel[data-size-tier="medium"] :is(.cyber-sec-epss, .cyber-sec-gn) { display: none !important; }
+
+/* RESIZING */
+.panel-resizer{position:absolute;right:0;bottom:0;width:14px;height:14px;cursor:nwse-resize;z-index:10;background:linear-gradient(135deg, transparent 50%, var(--border-bright) 50%)}
+.panel-resizer:hover{background:linear-gradient(135deg, transparent 50%, var(--accent) 50%)}
+.g-panel{display:flex;flex-direction:column;min-height:60px;position:relative}
+.g-panel > :not(.sec-head){flex:1;min-height:0}
 
 /* LEFT RAIL */
 .layer-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);margin-bottom:4px}
@@ -153,13 +166,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .news-icon{fill:rgba(129,212,250,0.8);filter:drop-shadow(0 0 3px rgba(129,212,250,0.4));transition:fill .2s}
 .news-icon:hover{fill:rgba(129,212,250,1)}
 
-/* LOWER GRID — flex layout for responsive panel sizing */
-.lower{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:flex-start}
-.lower .g-panel{min-width:0;box-sizing:border-box}
-.lower .lp-ticker{flex:1.2 1 240px;max-width:380px}
-.lower .lp-delta{flex:1 1 200px;max-width:300px}
-.lower .lp-macro{flex:2.5 1 360px}
-.lower .lp-ideas{flex:1.5 1 300px}
+/* LOWER GRID — Grid layout for better sizing and independent column stacking */
+.lower{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));grid-auto-flow:dense;gap:10px;margin-top:10px;align-items:start}
+.lower .g-panel{min-width:0;width:100%;box-sizing:border-box}
+.lower .lp-ticker{grid-column:span 1}
+.lower .lp-delta{grid-column:span 1}
+.lower .lp-macro{grid-column:span 2}
+.lower .lp-ideas{grid-column:span 1}
 .lower-wide{width:100%}
 .metrics-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
 .mc{padding:10px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02)}
@@ -261,7 +274,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 /* RESPONSIVE */
 @media(max-width:1400px){.grid{grid-template-columns:240px 1fr 320px}.metrics-row{grid-template-columns:repeat(3,1fr)}.src-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:1100px){.grid{grid-template-columns:1fr}.lower .lp-ticker,.lower .lp-delta,.lower .lp-macro,.lower .lp-ideas{flex:1 1 100%;max-width:none}.metrics-row{grid-template-columns:repeat(2,1fr)}.src-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.lower .lp-ticker,.lower .lp-delta,.lower .lp-macro,.lower .lp-ideas{grid-column:span 1;max-width:none}.metrics-row{grid-template-columns:repeat(2,1fr)}.src-grid{grid-template-columns:repeat(2,1fr)}}
 
 /* CONFLICT LAYER */
 @keyframes pulse-conflict{0%,100%{opacity:0.5;stroke-width:1.5}50%{opacity:0.9;stroke-width:2.5}}
@@ -1308,24 +1321,18 @@ function renderLower(){
       </div>`:''}
       <div class="delta-list">${deltaHtml}</div>
     </div>
-    <div class="g-panel lp-macro" data-panel-id="macro-markets">
-      <div class="sec-head"><h3>Macro + Markets</h3><span class="badge">${mkt.timestamp?'LIVE':'DELAYED'}</span></div>
-      ${hasMarkets?`<div style="margin-bottom:8px">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;letter-spacing:1px">INDEXES</div>
-        <div class="metrics-row">${indexCards}</div>
+    <div class="g-panel lp-macro" data-panel-id="macro-metrics">
+      <div class="sec-head"><h3>Macro Trends</h3><span class="badge">INDICATORS</span></div>
+      <div class="metrics-row">
+        ${metrics.map(m=>`
+          <div class="mc">
+            <div class="ml">${m.l}</div>
+            <span class="mv" ${m.l==='VIX'&&parseFloat(m.v)>20?'style="color:var(--warn)"':''}>${m.v}</span>
+            <span class="ms">${m.s}</span>
+            ${m.spark?mkSparkSvg(m.spark,m.sparkUp):`<div class="mbar"><span style="width:${m.p}%"></span></div>`}
+          </div>`).join('')}
       </div>
-      <div style="margin-bottom:8px">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;letter-spacing:1px">CRYPTO</div>
-        <div class="metrics-row">${cryptoCards}</div>
-      </div>`:''}
-      <div style="margin-bottom:8px">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px;letter-spacing:1px">ENERGY + MACRO</div>
-        <div class="metrics-row">${metrics.map(m=>{
-          const sparkSvg = m.spark ? mkSparkSvg(m.spark, m.sparkUp) : '';
-          return `<div class="mc"><div class="ml">${m.l}</div><span class="mv">${m.v}${sparkSvg}</span><span class="ms">${m.s}</span><div class="mbar"><span style="width:${m.p}%"></span></div></div>`;
-        }).join('')}</div>
-      </div>
-      <div style="margin-top:6px">
+      <div style="margin-top:10px">
         <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:4px">WTI 5-DAY</div>
         <div class="spark">${sparkHtml}</div>
       </div>
@@ -1423,6 +1430,85 @@ function safeExternalUrl(raw){try{const u=new URL(raw,location.href);return u.pr
 // === PANEL LAYOUT ===
 const PANEL_LAYOUT_KEY = 'crucixPanelLayout';
 const PANEL_MINIMIZE_KEY = 'crucixPanelMinimized';
+const PANEL_DIM_KEY = 'crucixPanelDimensions';
+
+function loadPanelDimensions(){
+  try { return JSON.parse(localStorage.getItem(PANEL_DIM_KEY) || '{}'); }
+  catch { return {}; }
+}
+function updateSizeTier(panel){
+  const h = panel.offsetHeight;
+  let tier = 'full';
+  if(h < 260) tier = 'nano';
+  else if(h < 480) tier = 'small';
+  else if(h < 750) tier = 'medium';
+  panel.dataset.sizeTier = tier;
+}
+function savePanelDimensions(dims){
+  localStorage.setItem(PANEL_DIM_KEY, JSON.stringify(dims));
+}
+function applyPanelDimensions(panel){
+  const dims = loadPanelDimensions();
+  const id = panel.dataset.panelId;
+  if(!id || !dims[id]) return;
+  if(dims[id].h) panel.style.height = dims[id].h + 'px';
+  if(dims[id].span && panel.parentElement?.classList.contains('lower')){
+    panel.style.gridColumn = `span ${dims[id].span}`;
+  }
+  updateSizeTier(panel);
+}
+
+function ensurePanelResizeHandle(panel){
+  if(panel.querySelector('.panel-resizer')) return;
+  const resizer = document.createElement('div');
+  resizer.className = 'panel-resizer';
+  panel.appendChild(resizer);
+
+  resizer.onmousedown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startY = e.clientY;
+    const startX = e.clientX;
+    const startH = panel.offsetHeight;
+    const startW = panel.offsetWidth;
+    const isLower = panel.parentElement?.classList.contains('lower');
+
+    const onMouseMove = (moveEvent) => {
+      // Vertical resize
+      const deltaY = moveEvent.clientY - startY;
+      const newH = Math.min(window.innerHeight * 0.85, Math.max(80, startH + deltaY));
+      panel.style.height = newH + 'px';
+      updateSizeTier(panel);
+
+      // Horizontal span toggle (only in lowerGrid)
+      if(isLower){
+        const deltaX = moveEvent.clientX - startX;
+        const currentSpan = panel.style.gridColumn.includes('2') ? 2 : 1;
+        if(deltaX > 150 && currentSpan === 1) panel.style.gridColumn = 'span 2';
+        if(deltaX < -150 && currentSpan === 2) panel.style.gridColumn = 'span 1';
+      }
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      
+      const dims = loadPanelDimensions();
+      const id = panel.dataset.panelId;
+      if(id){
+        dims[id] = {
+          h: panel.offsetHeight,
+          span: panel.style.gridColumn.includes('2') ? 2 : 1
+        };
+        savePanelDimensions(dims);
+      }
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+}
+
 function loadPanelMinimized(){
   try { return JSON.parse(localStorage.getItem(PANEL_MINIMIZE_KEY) || '{}'); }
   catch { return {}; }
@@ -1472,6 +1558,7 @@ function restorePanelLayout(){
       const panel = panelMap.get(panelId);
       if(panel){
         zone.appendChild(panel);
+        applyPanelDimensions(panel);
         panelMap.delete(panelId);
       }
     }
@@ -1526,16 +1613,21 @@ function ensurePanelMinButton(panel){
   };
   right.appendChild(btn);
 }
-function getDropReference(container, clientY){
+function getDropReference(container, clientX, clientY){
   const panels = [...container.querySelectorAll('.g-panel[data-panel-id]:not(.panel-dragging)')];
   return panels.reduce((closest, panel) => {
     const box = panel.getBoundingClientRect();
-    const offset = clientY - (box.top + box.height / 2);
-    if(offset < 0 && offset > closest.offset){
-      return { offset, element: panel };
+    const dx = clientX - (box.left + box.width / 2);
+    const dy = clientY - (box.top + box.height / 2);
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    // 2D Check: determine if cursor is positioned 'before' this element in the grid flow
+    const isBefore = (clientY < box.top + box.height / 2) || (clientY < box.bottom && clientX < box.left + box.width / 2);
+
+    if(isBefore && distance < closest.distance){
+      return { distance, element: panel };
     }
     return closest;
-  }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+  }, { distance: Infinity, element: null }).element;
 }
 function wirePanelZone(zoneId){
   const zone = document.getElementById(zoneId);
@@ -1544,7 +1636,9 @@ function wirePanelZone(zoneId){
   panels.forEach(panel => {
     ensurePanelGrip(panel);
     ensurePanelMinButton(panel);
+    ensurePanelResizeHandle(panel);
     applyPanelMinimized(panel, isPanelMinimized(panel.dataset.panelId));
+    applyPanelDimensions(panel);
     panel.setAttribute('draggable', 'true');
     panel.ondragstart = () => {
       draggedPanel = panel;
@@ -1561,7 +1655,7 @@ function wirePanelZone(zoneId){
     event.preventDefault();
     if(!draggedPanel) return;
     zone.classList.add('panel-drop-target');
-    const reference = getDropReference(zone, event.clientY);
+    const reference = getDropReference(zone, event.clientX, event.clientY);
     if(!reference) zone.appendChild(draggedPanel);
     else if(reference !== draggedPanel) zone.insertBefore(draggedPanel, reference);
   };
@@ -1712,6 +1806,7 @@ function renderCyberPanel() {
     </div>`).join('');
   return `
     <div class="sec-head"><h3>Cyber Watch</h3><span class="badge">LIVE</span></div>
+    <div class="cyber-sec-stats">
     <div class="cyber-stat"><span class="cl">CVEs (7d hi/crit)</span><span class="cv" style="color:var(--warn)">${nist.highCount||0}H + ${nist.criticalCount||0}C</span></div>
     <div class="cyber-stat"><span class="cl">CISA KEV Total</span><span class="cv">${cisa.kevTotal||0}</span></div>
     <div class="cyber-stat"><span class="cl">KEV Added (30d)</span><span class="cv" style="color:var(--warn)">${cisa.kevRecentCount||0}</span></div>
@@ -1721,16 +1816,27 @@ function renderCyberPanel() {
     <div class="cyber-stat"><span class="cl">GreyNoise Hits</span><span class="cv">${greynoise.noisy||0}/${greynoise.totalChecked||0}</span></div>
     ${cisa.ransomwareCount?`<div class="cyber-stat"><span class="cl">Ransomware-linked</span><span class="cv" style="color:var(--danger)">${cisa.ransomwareCount}</span></div>`:''}
     ${correlation.ransomwareOverlapCount?`<div class="cyber-stat"><span class="cl">Correlated Ransomware</span><span class="cv" style="color:var(--danger)">${correlation.ransomwareOverlapCount}</span></div>`:''}
+    </div>
+    <div class="cyber-sec-cves">
     <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Top CVEs</div>
     ${topCves||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No high/critical CVEs this week</div>'}
+    </div>
+    <div class="cyber-sec-corr">
     <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS → NIST Priorities</div>
     ${correlationRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS-ranked overlap with recent NIST CVEs</div>'}
+    </div>
+    <div class="cyber-sec-kevs">
     <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">Recent KEVs</div>
     ${kevRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No recent exploited vulns</div>'}
+    </div>
+    <div class="cyber-sec-epss">
     <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">EPSS Priority</div>
     ${epssRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">No EPSS high-risk CVEs</div>'}
+    </div>
+    <div class="cyber-sec-gn">
     <div style="margin:8px 0 4px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase">GreyNoise Watchlist</div>
-    ${gnRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">GreyNoise watchlist not configured</div>'}`;
+    ${gnRows||'<div style="font-size:10px;color:var(--dim);padding:4px 0">GreyNoise watchlist not configured</div>'}
+    </div>`;
 }
 
 // === BOOT SEQUENCE ===
